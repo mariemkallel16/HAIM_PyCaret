@@ -2,7 +2,7 @@ import os
 import json
 from time import strftime
 from typing import Dict, List, Optional, Union, Any
-from sklearn.model_selection import StratifiedKFold, KFold, ShuffleSplit
+from sklearn.model_selection import StratifiedKFold, KFold
 from pycaret.classification import (
     create_model, setup, compare_models, pull, save_model, predict_model, tune_model, plot_model
 )
@@ -10,11 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from src.data.dataset import HAIMDataset
-from src.utils.metric_scores import (
-    BrierScore, BinaryBalancedAccuracy, BinaryCrossEntropy,
-    BalancedAccuracyEntropyRatio, Sensitivity, Specificity,
-    NegativePredictiveValue, F2Score, NTP, NFP, NFN, NTN
-)
+
 
 class PyCaretEvaluator:
     """
@@ -58,27 +54,7 @@ class PyCaretEvaluator:
         """
         with open(os.path.join(self.filepath, filename), 'w', encoding='utf-8') as f:
             json.dump(results, f, indent=4)
-
-    def plot_roc_curves(self, model, fold: int) -> None:
-        """
-        Plots the ROC curve for the given model using PyCaret.
-
-        Args:
-            model: The trained model.
-            fold (int): The current fold number.
-        """
-        plot_model(model, plot='auc')
-        plt.savefig(os.path.join(self.filepath, f'roc_curve_fold_{fold}.png'))
-        plt.close()
-
-    def random_sampling_outer_cv(self, X, y, n_splits=3, test_size=0.2, random_state=42):
-        """
-        Uses ShuffleSplit to create random folds for external validation.
-        """
-        random_split = ShuffleSplit(n_splits=n_splits, test_size=test_size, random_state=random_state)
-        splits = [(train_index.tolist(), test_index.tolist()) for train_index, test_index in random_split.split(X)]
-        return splits
-
+ 
     def run_experiment(self,
                        train_size: float = 0.8,
                        fold: int = 5,
@@ -174,8 +150,6 @@ class PyCaretEvaluator:
             save_model(best_model, os.path.join(self.filepath, f"best_model_fold_{i}"))
             test_predictions = predict_model(best_model, data=test_df)
 
-            # Plot ROC curves using PyCaret
-            self.plot_roc_curves(best_model, i)
 
             # Save results
             split_result = {
