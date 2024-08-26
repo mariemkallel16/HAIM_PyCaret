@@ -8,3 +8,5 @@ Fracture_*
 !.gitkeep
 !*best_experiment*
 *.csv
+logs.log
+results
