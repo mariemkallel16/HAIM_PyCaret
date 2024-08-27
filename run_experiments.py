@@ -21,7 +21,7 @@ from xgboost import XGBClassifier
 from src.data import constants
 from src.data.dataset import Task, HAIMDataset
 from src.data.sampling import Sampler
-from src.evaluation.evaluating import Evaluator
+from src.evaluation.pycaret_evaluator import PyCaretEvaluator
 from src.evaluation.tuning import SklearnTuner
 from src.utils.metric_scores import *
 
@@ -69,48 +69,29 @@ def run_single_experiment(prediction_task: str,
                           constants.IMG_ID,
                           constants.GLOBAL_ID)
 
-    # Sample the dataset using a 5-folds cross-validation method
-    sampler = Sampler(dataset, constants.GLOBAL_ID, 5)
-    _, masks = sampler()
-
-    # Initialization of the list containing the evaluation metrics
-    evaluation_metrics = [BinaryAccuracy(),
-                          BinaryBalancedAccuracy(),
-                          BinaryBalancedAccuracy(Reduction.GEO_MEAN),
-                          Sensitivity(),
-                          Specificity(),
-                          AUC(),
-                          BrierScore(),
-                          BinaryCrossEntropy()]
-
     # Define the grid of hyper-parameters for the tuning
     grid_hps = {'max_depth': [5, 6, 7, 8],
                 'n_estimators': [200, 300],
                 'learning_rate': [0.3, 0.1, 0.05],
                 }
 
-    # Save the fixed parameters of the model
-    fixed_params = {'seed': 42,
-                    'eval_metric': 'logloss',
-                    'verbosity': 1
-                    }
 
-    # Launch the evaluation
-    evaluation = Evaluator(dataset=dataset,
-                           masks=masks,
-                           metrics=evaluation_metrics,
-                           model=XGBClassifier,
-                           tuner=SklearnTuner,
-                           tuning_metric=AUC(),
-                           hps=grid_hps,
-                           n_tuning_splits=5,
-                           fixed_params=fixed_params,
-                           filepath=constants.EXPERIMENT_PATH,
-                           weight='scale_pos_weight',
-                           evaluation_name=evaluation_name
-                           )
-    evaluation.evaluate()
+    # Initialize the PyCaret Evaluator
+    evaluator = PyCaretEvaluator(dataset=dataset, experiment_name= evaluation_name, filepath="constants.EXPERIMENT_PATH")
 
+    # Model training and results evaluation
+    evaluator.run_experiment(
+            train_size=0.8,
+            fold=5,
+            fold_strategy='kfold',
+            outer_fold=5,
+            outer_strategy='kfold',
+            session_id=42,
+            model='xgboost',
+            optimize='AUC',
+            custom_grid=grid_hps
+        )
+    
 
 if __name__ == '__main__':
     # Get arguments passed
@@ -143,4 +124,4 @@ if __name__ == '__main__':
                                       dataset=df, evaluation_name=task + '_' + str(count))
                 bar.update()
 
-        Evaluator.get_best_of_experiments(task, constants.EXPERIMENT_PATH, count)
+        PyCaretEvaluator.get_best_of_experiments(task, constants.EXPERIMENT_PATH, count)
