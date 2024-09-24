@@ -3,6 +3,7 @@ import json
 from time import strftime
 from typing import Dict, List, Optional, Union, Any
 from sklearn.model_selection import StratifiedKFold, KFold
+import pandas as pd
 from pycaret.classification import (
     create_model, setup, pull, save_model, predict_model, tune_model
 )
@@ -10,8 +11,6 @@ from pycaret.classification import (
 import gc  # Garbage collector to liberate memory after each fold
 import ray  # Import Ray
 
-# Initialize Ray
-ray.init(ignore_reinit_error=True)
 
 class PyCaretEvaluator:
 
@@ -77,8 +76,8 @@ class PyCaretEvaluator:
                     fold=fold,
                     fold_strategy=fold_strategy,
                     session_id=fixed_params['seed'],  # Using the seed for reproducibility
-                    verbose=False,  # Use verbose=False to reduce output during setup
-                    silent=True)
+                    verbose=False  # Use verbose=False to reduce output during setup   
+            )
 
         print(f"Configuring PyCaret for outer fold {fold_num}")
 
@@ -158,6 +157,9 @@ class PyCaretEvaluator:
             outer_cv = KFold(n_splits=outer_fold, shuffle=True, random_state=session_id)
         else:
             raise ValueError(f"Unknown outer_strategy: {outer_strategy}")
+        
+        # Initialize Ray
+        ray.init(ignore_reinit_error=True)
 
         ray_tasks = []  # List to store Ray tasks
 
@@ -204,3 +206,5 @@ class PyCaretEvaluator:
 
             # Save the final metrics table to a CSV file
             metrics_table.to_csv(os.path.join(self.filepath, f"{self.experiment_name}_final_metrics.csv"), index=False)
+            
+            ray.shutdown()
