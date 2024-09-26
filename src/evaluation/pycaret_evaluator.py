@@ -50,7 +50,7 @@ class PyCaretEvaluator:
         with open(os.path.join(self.filepath, filename), 'w', encoding='utf-8') as f:
             json.dump(results, f, indent=4)
 
-    @ray.remote  # Mark this function to be executed in parallel by Ray
+    @ray.remote(memory=6e9)  # Mark this function to be executed in parallel by Ray
     def run_fold(self, train_index, test_index, fold_num, train_size, fold, fold_strategy, session_id, model, optimize, custom_grid, search_algorithm, fixed_params):
         """
         Run a single fold in parallel using Ray.
@@ -76,7 +76,8 @@ class PyCaretEvaluator:
                     fold=fold,
                     fold_strategy=fold_strategy,
                     session_id=fixed_params['seed'],  # Using the seed for reproducibility
-                    verbose=False  # Use verbose=False to reduce output during setup   
+                    verbose=False,
+                    n_jobs=1     
             )
 
         print(f"Configuring PyCaret for outer fold {fold_num}")
@@ -159,7 +160,7 @@ class PyCaretEvaluator:
             raise ValueError(f"Unknown outer_strategy: {outer_strategy}")
         
         # Initialize Ray
-        ray.init(ignore_reinit_error=True)
+        ray.init(ignore_reinit_error=True, num_cpus=128)
 
         ray_tasks = []  # List to store Ray tasks
 
