@@ -50,7 +50,7 @@ class PyCaretEvaluator:
         with open(os.path.join(self.filepath, filename), 'w', encoding='utf-8') as f:
             json.dump(results, f, indent=4)
 
-    @ray.remote(memory=6e9)  # Mark this function to be executed in parallel by Ray
+    @ray.remote(memory=8e9)  # Mark this function to be executed in parallel by Ray
     def run_fold(self, train_index, test_index, fold_num, train_size, fold, fold_strategy, session_id, model, optimize, custom_grid, search_algorithm, fixed_params):
         """
         Run a single fold in parallel using Ray.
