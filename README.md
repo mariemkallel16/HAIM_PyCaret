@@ -110,20 +110,21 @@ Below are the ``AUC`` values reported from our experiments compared to those rep
 
 
 
-Task AUC from our 2nd experiment | AUC from our 1st experiment | AUC from the paper |
----------| -----------| -----------| ----------- |
-Fracture | 0.837 +-0.1 | 0.828 +- 0.110 | 0.838 |
-Pneumothorax| 0.896 +-0.007 | 0.811 +- 0.021 | 0.836 |
-Pneumonia       | 0.877 +-0.012 | 0.871 +- 0.013 | 0.883    |
-Lung opacity       | 0.859 +-0.022  | 0.797 +- 0.015 | 0.816   |
-Lung lesion    | 0.888 +-0.069 | 0.829 +- 0.053	 | 0.844   |
-Enlarged Cardiomediastinum      | 0.888 +-0.019 | 0.877 +- 0.035	 | 0.876  |
-Edema      | 0.915+-0.005 | 0.915 +- 0.007		 |0.917	 |
-Consolidation    | 0.912 +-0.015 | 0.918 +- 0.018		 | 0.929 |
-Cardiomegaly      | 0.922 +-0.006 | 0.908 +- 0.004	 | 0.914 |
-Atelectasis     | 0.823 +-0.042 | 0.765 +- 0.013	 | 0.779	 |
-Length of stay     | 0.959+-0.003 | 0.932 +- 0.012		 | 0.939|
-48 hours mortality     | 0.96 +-0.004 | 0.907 +- 0.007		 | 0.912	|
+| Task                    | AUC from our 2nd experiment | AUC from our 1st experiment | AUC from the paper |
+|-------------------------|-----------------------------|-----------------------------|--------------------|
+| Fracture                | 0.837 +- 0.1                | 0.828 +- 0.110              | 0.838              |
+| Pneumothorax            | 0.896 +- 0.007              | 0.811 +- 0.021              | 0.836              |
+| Pneumonia               | 0.877 +- 0.012              | 0.871 +- 0.013              | 0.883              |
+| Lung opacity            | 0.859 +- 0.022              | 0.797 +- 0.015              | 0.816              |
+| Lung lesion             | 0.888 +- 0.069              | 0.829 +- 0.053              | 0.844              |
+| Enlarged Cardiomediastinum | 0.888 +- 0.019           | 0.877 +- 0.035              | 0.876              |
+| Edema                   | 0.915 +- 0.005              | 0.915 +- 0.007              | 0.917              |
+| Consolidation           | 0.912 +- 0.015              | 0.918 +- 0.018              | 0.929              |
+| Cardiomegaly            | 0.922 +- 0.006              | 0.908 +- 0.004              | 0.914              |
+| Atelectasis             | 0.823 +- 0.042              | 0.765 +- 0.013              | 0.779              |
+| Length of stay          | 0.959 +- 0.003              | 0.932 +- 0.012              | 0.939              |
+| 48 hours mortality      | 0.960 +- 0.004              | 0.907 +- 0.007              | 0.912              |
+
 
 More statistics and metrics are reported from each of the 12 experiments above and can be found in the ``experiments`` directory. Each experiment directory is named after the task on which the prediction model was evaluated.
 
