@@ -4,14 +4,35 @@ It uses the [HAIM multimodal dataset](https://physionet.org/content/haim-multimo
 (tabular, time-series, text and images) and 11 unique sources
 to perform 12 predictive tasks (10 chest pathologies, length-of-stay and 48 h mortality predictions).
 
-This package is our own adaptation of the [HAIM GitHub package](https://github.com/lrsoenksen/HAIM.git). 
+The first package is our own adaptation of the [HAIM GitHub package](https://github.com/lrsoenksen/HAIM.git).
+This package is an adaptation of the adapted [HAIM GitHub package](https://github.com/MEDomics-UdeS/HAIM) using PyCaret for model management and training and Ray for distributed computation.
 
-## 2. How to use the package ?
-The dataset used to replicate this study is publicly available in [physionet](https://physionet.org/content/haim-multimodal/1.0.1/). To run this package:
-- Download the dataset and move the file ``cxr_ic_fusion_1103.csv`` to [csvs](csvs).
-- Install the requirements under **Python 3.9.13** as following:
-```
-$ pip install -r requirements.txt
+## 2. How to use the package?
+The dataset used to replicate this study is publicly available on [physionet](https://physionet.org/content/haim-multimodal/1.0.1/). To run this package: 
+
+How to set up the environment using Conda?
+
+To run this package on **Python 3.10 or 3.11**, you need to set up a Conda environment to manage dependencies.
+
+### 2.1 Creating and Activating a Conda Environment
+
+1. **Create the environment** with the required Python version:
+
+   - For **Python 3.10**:
+     ```bash
+     conda create --name haim_env python=3.10
+     ```
+
+   - For **Python 3.11**:
+     ```bash
+     conda create --name haim_env python=3.11
+     ```
+
+2. **Activate the Conda environment**:
+
+   ```bash
+   conda activate haim_env
+
 ```
 The package can be used with different sources combinations to predict one of the 12 predictive tasks defined above. Here is a code snippet which uses one 
 combination of sources to predict patient's length-of-stay:
@@ -106,20 +127,21 @@ Below are the ``AUC`` values reported from our experiments compared to those rep
 
 
 
-Task | AUC from our experiment | AUC from the paper |
----------| -----------| ----------- |
-Fracture | 0.828 +- 0.110 | 0.838 |
-Pneumothorax| 0.811 +- 0.021 | 0.836 |
-Pneumonia       | 0.871 +- 0.013 | 0.883    |
-Lung opacity       | 	0.797 +- 0.015 | 0.816   |
-Lung lesion    | 0.829 +- 0.053	 | 0.844   |
-Enlarged Cardiomediastinum      | 0.877 +- 0.035	 | 0.876  |
-Edema      | 0.915 +- 0.007		 |0.917	 |
-Consolidation    | 0.918 +- 0.018		 | 0.929 |
-Cardiomegaly      | 0.908 +- 0.004	 | 0.914 |
-Atelectasis     | 0.765 +- 0.013	 | 0.779	 |
-Length of stay     | 0.932 +- 0.012		 | 0.939|
-48 hours mortality     | 0.907 +- 0.007		 | 0.912	|
+| Task                    | AUC from our 2nd experiment | AUC from our 1st experiment | AUC from the paper |
+|-------------------------|-----------------------------|-----------------------------|--------------------|
+| Fracture                | 0.837 +- 0.1                | 0.828 +- 0.110              | 0.838              |
+| Pneumothorax            | 0.896 +- 0.007              | 0.811 +- 0.021              | 0.836              |
+| Pneumonia               | 0.877 +- 0.012              | 0.871 +- 0.013              | 0.883              |
+| Lung opacity            | 0.859 +- 0.022              | 0.797 +- 0.015              | 0.816              |
+| Lung lesion             | 0.888 +- 0.069              | 0.829 +- 0.053              | 0.844              |
+| Enlarged Cardiomediastinum | 0.888 +- 0.019           | 0.877 +- 0.035              | 0.876              |
+| Edema                   | 0.915 +- 0.005              | 0.915 +- 0.007              | 0.917              |
+| Consolidation           | 0.912 +- 0.015              | 0.918 +- 0.018              | 0.929              |
+| Cardiomegaly            | 0.922 +- 0.006              | 0.908 +- 0.004              | 0.914              |
+| Atelectasis             | 0.823 +- 0.042              | 0.765 +- 0.013              | 0.779              |
+| Length of stay          | 0.959 +- 0.003              | 0.932 +- 0.012              | 0.939              |
+| 48 hours mortality      | 0.960 +- 0.004              | 0.907 +- 0.007              | 0.912              |
+
 
 More statistics and metrics are reported from each of the 12 experiments above and can be found in the ``experiments`` directory. Each experiment directory is named after the task on which the prediction model was evaluated.
 
@@ -132,9 +154,9 @@ More statistics and metrics are reported from each of the 12 experiments above a
 We tried to reproduce the HAIM experiment and used all the 1023 possible sources combinations to predict the presence or absence of a fracture in a patient and select the one resulting in the best ``AUC``.
 
 Below the ``AUC`` value reported from our experiments compared to the one reported in the HAIM paper. 
- AUC from our experiment | AUC from the paper |
+ AUC from our experiment with PyCaret | AUC from our experiment | AUC from the paper |
  -----------| ----------- |
-0.862 +- 0.112 | 0.838 |
+0.837 +-0.1 | 0.862 +- 0.112 | 0.838 |
  
  
 The above experiment can be performed using the following command
@@ -155,10 +177,8 @@ The next step of our package is to regenerate the embeddings for each source typ
 │   ├── data
 │   │   ├── constants.py           <- Constants related to the HAIM study
 │   │   ├── datasets.py           <- Custom dataset implementation for the HAIM study
-│   │   └── sampling.py           <- Samples the dataset to test, train and validation
 │   ├── evaluation
-│   │   ├── tuning.py             <- Hyper-parameters optimizations using different optimizers
-│   │   └── evaluating.py         <- Skeleton of each experiment process 
+│   │   └── pycaret_evaluator.py         <- Skeleton of each experiment process 
 │   └── utils                     
 │   │   └── metric_scores.py      <- Custom metrics implementations and wrappers
 ├── requirements.txt              <- All the requirements to install to run the project
