@@ -10,12 +10,29 @@ This package is an adaptation of the adapted [HAIM GitHub package](https://githu
 ## 2. How to use the package?
 The dataset used to replicate this study is publicly available on [physionet](https://physionet.org/content/haim-multimodal/1.0.1/). To run this package: 
 
-## 2. How to use the package ?
-The dataset used to replicate this study is publicly available in [physionet](https://physionet.org/content/haim-multimodal/1.0.1/). To run this package:
-- Download the dataset and move the file ``cxr_ic_fusion_1103.csv`` to [csvs](csvs).
-- Install the requirements under **Python 3.11** as following:
-```
-$ pip install -r requirements.txt
+How to set up the environment using Conda?
+
+To run this package on **Python 3.10 or 3.11**, you need to set up a Conda environment to manage dependencies.
+
+### 2.1 Creating and Activating a Conda Environment
+
+1. **Create the environment** with the required Python version:
+
+   - For **Python 3.10**:
+     ```bash
+     conda create --name haim_env python=3.10
+     ```
+
+   - For **Python 3.11**:
+     ```bash
+     conda create --name haim_env python=3.11
+     ```
+
+2. **Activate the Conda environment**:
+
+   ```bash
+   conda activate haim_env
+
 ```
 The package can be used with different sources combinations to predict one of the 12 predictive tasks defined above. Here is a code snippet which uses one 
 combination of sources to predict patient's length-of-stay:
