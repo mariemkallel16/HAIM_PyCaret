@@ -12,6 +12,8 @@ import ray  # Import Ray
 from pycaret.classification import (create_model, predict_model, pull, save_model,
                                     setup, tune_model)
 
+os.environ["RAY_DEDUP_LOGS"] = "0"
+
 
 class PyCaretEvaluator:
     """
