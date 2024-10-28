@@ -51,7 +51,7 @@ class PyCaretEvaluator:
         with open(os.path.join(self.filepath, filename), 'w', encoding='utf-8') as f:
             json.dump(results, f, indent=4)
 
-    @ray.remote(memory=6e9)  # Mark this function to be executed in parallel by Ray
+    @ray.remote(memory=8e9)  # Mark this function to be executed in parallel by Ray
     def run_fold(self, 
                  train_index: np.ndarray, 
                  test_index: np.ndarray, 
@@ -148,7 +148,7 @@ class PyCaretEvaluator:
     def run_experiment(self, 
                        train_size: float = 0.8, 
                        fold: int = 5, 
-                       fold_strategy: str = 'kfold', 
+                       fold_strategy: str = 'stratifiedkfold', 
                        outer_fold: int = 5, 
                        outer_strategy: str = 'stratifiedkfold',
                        session_id: int = 42, 

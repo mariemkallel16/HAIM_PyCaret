@@ -33,7 +33,16 @@ To run this package on **Python 3.10 or 3.11**, you need to set up a Conda envir
    ```bash
    conda activate haim_env
 
-```
+   ```
+
+### 2.2 Installing the requirements
+
+  ```bash
+   pip install -r requirements.txt
+
+   ```
+
+
 The package can be used with different sources combinations to predict one of the 12 predictive tasks defined above. Here is a code snippet which uses one 
 combination of sources to predict patient's length-of-stay:
 ```python 
