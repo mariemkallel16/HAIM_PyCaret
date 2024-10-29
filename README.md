@@ -5,7 +5,7 @@ It uses the [HAIM multimodal dataset](https://physionet.org/content/haim-multimo
 to perform 12 predictive tasks (10 chest pathologies, length-of-stay and 48 h mortality predictions).
 
 The first package is MEDomicsLab’s own adaptation of the [HAIM GitHub package](https://github.com/lrsoenksen/HAIM.git).
-This package is an adaptation of the [HAIM GitHub package](https://github.com/MEDomics-UdeS/HAIM), incorporating our custom PyCaretEvaluator class."
+This package is an adaptation of the [HAIM GitHub package](https://github.com/MEDomics-UdeS/HAIM), incorporating our custom PyCaretEvaluator class.
 
 The PyCaretEvaluator class is designed to streamline and enhance the model evaluation process by integrating the PyCaret library with Ray for parallel execution, allowing for efficient memory management and performance optimization. PyCaret is an open-source, low-code machine learning library in Python that simplifies the process of building, training, and deploying machine learning models. This class is particularly useful for cases involving extensive model evaluations or hyperparameter tuning across multiple cross-validation folds. By leveraging Ray, the class executes each fold in parallel, reducing computation time and improving scalability on larger datasets.
 
@@ -188,8 +188,7 @@ This file gives an overall view of the model’s performance and consistency acr
 > **Note**
 > 
 > The Matthews Correlation Coefficient (MCC) is a metric that evaluates how well a model’s predictions match actual outcomes, balancing correct and incorrect predictions even when classes are imbalanced.
-
-> Cohen’s Kappa measures the level of agreement between two raters or classifiers, showing how often they agree beyond what would be expected by chance.
+ Cohen’s Kappa measures the level of agreement between two raters or classifiers, showing how often they agree beyond what would be expected by chance.
 
 
 #### 3. ```best_model_fold_X.pkl``` (where X is the fold number):
