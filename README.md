@@ -5,15 +5,12 @@ It uses the [HAIM multimodal dataset](https://physionet.org/content/haim-multimo
 to perform 12 predictive tasks (10 chest pathologies, length-of-stay and 48 h mortality predictions).
 
 The first package is our own adaptation of the [HAIM GitHub package](https://github.com/lrsoenksen/HAIM.git).
-This package is an adaptation of the adapted [HAIM GitHub package](https://github.com/MEDomics-UdeS/HAIM) using our PyCaretEvaluator class. 
+This package is an adaptation of the [HAIM GitHub package](https://github.com/MEDomics-UdeS/HAIM), incorporating our custom PyCaretEvaluator class."
 
 The PyCaretEvaluator class is designed to streamline and enhance the model evaluation process by integrating the PyCaret library with Ray for parallel execution, allowing for efficient memory management and performance optimization. PyCaret is an open-source, low-code machine learning library in Python that simplifies the process of building, training, and deploying machine learning models. This class is particularly useful for cases involving extensive model evaluations or hyperparameter tuning across multiple cross-validation folds. By leveraging Ray, the class executes each fold in parallel, reducing computation time and improving scalability on larger datasets.
 
 ## 2. How to use the package?
-The dataset used to replicate this study is publicly available on [physionet](https://physionet.org/content/haim-multimodal/1.0.1/). To run this package: 
-
-How to set up the environment using Conda?
-
+The dataset used to replicate this study is publicly available on [physionet](https://physionet.org/content/haim-multimodal/1.0.1/). 
 To run this package on **Python 3.10 or 3.11**, you need to set up a Conda environment to manage dependencies.
 
 ### 2.1 Creating and Activating a Conda Environment
@@ -158,9 +155,10 @@ More statistics and metrics are reported from each of the 12 experiments above a
 We tried to reproduce the HAIM experiment and used all the 1023 possible sources combinations to predict the presence or absence of a fracture in a patient and select the one resulting in the best ``AUC``.
 
 Below the ``AUC`` value reported from our experiments compared to the one reported in the HAIM paper. 
- AUC from our experiment with PyCaret | AUC from our experiment | AUC from the paper |
- -----------| ----------- |
-0.731 +-0.134 | 0.862 +- 0.112 | 0.838 |
+ | AUC from our experiment with PyCaret | AUC from our experiment | AUC from the paper |
+|--------------------------------------|-------------------------|---------------------|
+| 0.731 ± 0.134                        | 0.862 ± 0.112          | 0.838              |
+
  
  
 The above experiment can be performed using the following command
@@ -200,9 +198,10 @@ A recap of the experiment (results/fracture) is generated at the end of the expe
     Each model file can be reloaded independently if further analysis or testing is needed.
     Saving the best models for each fold allows you to compare models or even ensemble them if desired.
 
+All the results can be accessed via this link: https://usherbrooke-my.sharepoint.com/:f:/g/personal/kalm7073_usherbrooke_ca/EtKnOhTN1kdJmRbkziHYX9EBkgMSWzhfvXMV4lb_fZw3uQ?e=Olejde.
 
 ## 5. Future work
-This adaptation was done in order to test HAIM with PyCaret in order to assimilate its efficiency within our MEDomicsLab platform. For future work, we will continue to test tasks with multiple variations in order to have better results.
+This adaptation aims to evaluate HAIM with PyCaret to better understand its effectiveness within the MEDomicsLab platform. Moving forward, we plan to test additional task variations to further optimize performance.
 
 ## Project Tree
 ```
