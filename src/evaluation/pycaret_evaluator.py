@@ -12,7 +12,7 @@ import ray  # Import Ray
 from pycaret.classification import (create_model, predict_model, pull, save_model,
                                     setup, tune_model)
 
-os.environ["RAY_DEDUP_LOGS"] = "0"
+os.environ["RAY_DEDUP_LOGS"] = "0" # Disables log deduplication in Ray
 
 
 class PyCaretEvaluator:
@@ -25,18 +25,20 @@ class PyCaretEvaluator:
         Initialize the class parameters.
 
         Args:
-            dataset (Any): the used dataset for machine learning.
+            dataset (Any): the used dataset for the task.
             target (str): the target class.
             experiment_name (Optional[str]): optional name for the experiment.
             filepath (str): path for saving results.
             columns (Optional[List[str]]): optional list of column names.
         """
+        # Initialize instance variables
         self.dataset = dataset
         self.target = target
         self.experiment_name = experiment_name if experiment_name else f"experiment_{strftime('%Y%m%d-%H%M%S')}"
         self.filepath = filepath
         self.columns = columns
 
+        # Create the directory if it doesn't exist
         if not os.path.exists(self.filepath):
             os.makedirs(self.filepath)
 
@@ -71,7 +73,7 @@ class PyCaretEvaluator:
         Args:
             train_index (np.ndarray): Array of training indices for the fold.
             test_index (np.ndarray): Array of testing indices for the fold.
-            fold_num (int): The current fold number.
+            fold_num (int): Current fold number.
             train_size (float): Proportion of data to use for training within the fold.
             fold (int): Number of folds for inner cross-validation.
             fold_strategy (str): Strategy for inner cross-validation (e.g., 'kfold', 'stratifiedkfold').
@@ -87,13 +89,13 @@ class PyCaretEvaluator:
         """
         print(f"Outer fold {fold_num}")
 
-        # Extract the subsets using the given indices from StratifiedKFold
+        # Extract training and testing subsets
         train_data_x = self.dataset.x[train_index]
         train_data_y = self.dataset.y[train_index]
         test_data_x = self.dataset.x[test_index]
         test_data_y = self.dataset.y[test_index]
 
-        # PyCaret setup expects a DataFrame, so we convert the NumPy arrays to DataFrames
+        # Convert NumPy arrays to DataFrames for PyCaret setup
         train_df = pd.DataFrame(train_data_x, columns=self.columns)
         train_df[self.target] = train_data_y
         test_df = pd.DataFrame(test_data_x, columns=self.columns)
@@ -107,7 +109,7 @@ class PyCaretEvaluator:
                     target=self.target,
                     train_size=train_size,
                     fold=fold,
-                    fold_strategy=fold_strategy,  # Directly using StratifiedKFold internally if needed
+                    fold_strategy=fold_strategy,  
                     session_id=fixed_params['seed'],
                     verbose=False,
                     n_jobs=1)
@@ -131,7 +133,7 @@ class PyCaretEvaluator:
         save_model(best_model, os.path.join(self.filepath, f"best_model_fold_{fold_num}"))
         test_predictions = predict_model(best_model, data=test_df)
 
-        # Save the results of the fold
+        # Save fold results
         split_result = {
             'fold': fold_num,
             'train_results': model_results.to_dict(),
@@ -139,7 +141,7 @@ class PyCaretEvaluator:
             'best_hyperparams': best_hyperparams  # Save best hyperparameters for this fold
         }
 
-        # Clean up memory after each fold
+        # Clean up memory after each fold (memory management)
         del train_df, test_df, best_model, model_results, test_predictions, exp
         gc.collect()
 
@@ -158,14 +160,14 @@ class PyCaretEvaluator:
                        search_algorithm: str = 'grid', 
                        fixed_params: Dict[str, Any] = None) -> None:
         """
-        Executes the complete experiment including external cross-validation, training, and model optimization.
+        Runs the entire experiment, including external cross-validation, training, and model optimization.
 
         Args:
             train_size (float): Proportion of the dataset to include in the training split.
             fold (int): Number of folds for internal cross-validation.
             fold_strategy (str): Strategy for internal cross-validation ('kfold', 'stratifiedkfold').
             outer_fold (int): Number of folds for external cross-validation.
-            outer_strategy (str): Strategy for external cross-validation ('kfold', 'stratifiedkfold', 'random_sampling').
+            outer_strategy (str): Strategy for external cross-validation ('kfold', 'stratifiedkfold').
             session_id (int): Session ID for reproducibility.
             model (Optional[str]): Specific model to use.
             optimize (Union[str, List[str]]): The metric to optimize.
@@ -173,6 +175,7 @@ class PyCaretEvaluator:
             search_algorithm (str): Algorithm to use for hyperparameter tuning ('grid' or 'random').
             fixed_params (Dict[str, Any]): Fixed parameters such as seed and eval_metric.
         """
+        # Params fixed by the original study
         if fixed_params is None:
             fixed_params = {'seed': 42, 'eval_metric': 'logloss', 'verbosity': 0}
 
@@ -184,14 +187,16 @@ class PyCaretEvaluator:
         else:
             raise ValueError(f"Unknown outer_strategy: {outer_strategy}")
         
-        ray.init(ignore_reinit_error=True, num_cpus=os.cpu_count())
+        ray.init(ignore_reinit_error=True, num_cpus=os.cpu_count()) # Initialize Ray with available CPUs
         ray_tasks = []  # List to store Ray tasks
 
+        # Generate Ray tasks for each fold
         for i, (train_index, test_index) in enumerate(outer_cv.split(self.dataset.x, self.dataset.y)):
             ray_task = self.run_fold.remote(self, train_index, test_index, i + 1, train_size, fold, fold_strategy, session_id, model, 
                                             optimize, custom_grid, search_algorithm, fixed_params)
             ray_tasks.append(ray_task)
 
+        # Execute and collect results of Ray tasks
         results = ray.get(ray_tasks)
         self.save_results(results, f"{self.experiment_name}_results.json")
 
@@ -208,6 +213,7 @@ class PyCaretEvaluator:
             if best_hyperparams:
                 best_hyperparams_list.append(best_hyperparams)
 
+        # Calculate and save the mean and standard deviation of metrics
         if fold_metrics_list:
             all_fold_metrics = pd.concat(fold_metrics_list, ignore_index=True)
             final_metrics_mean = all_fold_metrics.mean()
@@ -220,9 +226,8 @@ class PyCaretEvaluator:
 
             metrics_table.to_csv(os.path.join(self.filepath, f"{self.experiment_name}_final_metrics.csv"), index=False)
 
-        # Selecting the best hyperparameters based on the fold results
+        # Determine the most common hyperparameters across folds
         if best_hyperparams_list:
-            # You can either calculate the most frequent hyperparameters or take an average depending on the nature
             best_hyperparams_df = pd.DataFrame(best_hyperparams_list)
             most_common_hyperparams = best_hyperparams_df.mode().iloc[0]  # Most frequent hyperparameters across folds
             print(f"Best hyperparameters across all folds: {most_common_hyperparams}")

@@ -10,12 +10,13 @@ Date of last modification : 2023/02/07
 """
 
 import argparse
+import os
 from itertools import combinations
-from tqdm import tqdm
 from typing import List, Optional
 
 from numpy import unique
 from pandas import read_csv, DataFrame
+from tqdm import tqdm
 
 from src.data import constants
 from src.data.dataset import HAIMDataset
@@ -55,6 +56,11 @@ def run_single_experiment(prediction_task: str,
         dataset(Optional[DataFrame]): HAIM dataframe
         evaluation_name(Optional[str]): name of the experiment
     """
+
+    # Set up the folder path specific to the prediction task
+    task_folder = f"experiments/{prediction_task}"
+    if not os.path.exists(task_folder):
+        os.makedirs(task_folder)
     dataset = read_csv(constants.FILE_DF, nrows=constants.N_DATA) if dataset is None else dataset
 
     # Create the HAIMDataset
@@ -72,17 +78,17 @@ def run_single_experiment(prediction_task: str,
 
     # Initialize the PyCaret Evaluator
     evaluator = PyCaretEvaluator(dataset=dataset,
-                                 target=prediction_task,  # Ajout de l'argument target ici
+                                 target=prediction_task,  
                                  experiment_name=evaluation_name,
-                                 filepath="constants.EXPERIMENT_PATH")
+                                 filepath=task_folder)
 
     # Model training and results evaluation
     evaluator.run_experiment(
         train_size=0.8,
         fold=5,
-        fold_strategy='kfold',
+        fold_strategy='stratifiedkfold',
         outer_fold=5,
-        outer_strategy='kfold',
+        outer_strategy='stratifiedkfold',
         session_id=42,
         model='xgboost',
         optimize='AUC',
@@ -101,7 +107,11 @@ if __name__ == '__main__':
     df = read_csv(constants.FILE_DF, nrows=constants.N_DATA)
 
     # Handle all tasks if none specified
-    all_tasks = [args.task] if args.task else Task()
+    all_tasks = [args.task] if args.task else [constants.FRACTURE, constants.PNEUMOTHORAX, constants.PNEUMONIA, 
+                                           constants.LUNG_OPACITY, constants.LUNG_LESION, constants.ENLARGED_CARDIOMEDIASTINUM, 
+                                           constants.EDEMA, constants.CONSOLIDATION, constants.CARDIOMEGALY, 
+                                           constants.ATELECTASIS, constants.LOS, constants.MORTALITY]
+
 
     for task in all_tasks:
         print("#" * 23, f"{task} experiment", "#" * 23)
@@ -126,5 +136,4 @@ if __name__ == '__main__':
                                       evaluation_name=task + '_' + str(count))
                 bar.update()
 
-        # Optionally, collect the best experiments
-        PyCaretEvaluator.get_best_of_experiments(task, constants.EXPERIMENT_PATH, count)
+        
