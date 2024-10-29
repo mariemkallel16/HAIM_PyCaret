@@ -169,7 +169,7 @@ $ python run_experiments.py -t "Fracture"
 ```
 A recap of the experiment (results/fracture) is generated at the end of the experiment containing :
 
-# 1. ```{task}_results.json``` :
+#### 1. ```{task}_results.json``` :
 
     This JSON file stores detailed results for each fold in the cross-validation process.
     For each fold, it includes:
