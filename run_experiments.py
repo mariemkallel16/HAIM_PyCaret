@@ -1,39 +1,36 @@
 """
 Filename: run_experiments.py
 
-Author : Hakima Laribi
+Author : Hakima Laribi, Mariem Kallel
 
 Description: This file is used to perform all the HAIM experiments presented
-                in the paper: https://doi.org/10.1038/s41746-022-00689-4
+             in the paper: https://doi.org/10.1038/s41746-022-00689-4
 
 Date of last modification : 2023/02/07
 """
 
 import argparse
+import os
 from itertools import combinations
-from tqdm import tqdm
-from typing import List, Callable, Optional
+from typing import List, Optional
 
 from numpy import unique
 from pandas import read_csv, DataFrame
-from xgboost import XGBClassifier
+from tqdm import tqdm
 
 from src.data import constants
-from src.data.dataset import Task, HAIMDataset
-from src.data.sampling import Sampler
-from src.evaluation.evaluating import Evaluator
-from src.evaluation.tuning import SklearnTuner
-from src.utils.metric_scores import *
+from src.data.dataset import HAIMDataset
+from src.evaluation.pycaret_evaluator import PyCaretEvaluator
 
 
 def get_all_sources_combinations(sources: List[str]) -> List[List[str]]:
     """
-        Function to extract all possible combinations of sources
+    Function to extract all possible combinations of sources
 
-        Args:
-            sources(List[str]): list of sources types
+    Args:
+        sources(List[str]): list of sources types
 
-        Returns: list of combinations
+    Returns: list of combinations
     """
     comb = []
     for i in range(len(sources)):
@@ -50,15 +47,20 @@ def run_single_experiment(prediction_task: str,
                           dataset: Optional[DataFrame] = None,
                           evaluation_name: Optional[str] = None) -> None:
     """
-        Function to perform one single experiment
+    Function to perform one single experiment
 
-        Args:
-            prediction_task(task): task label, must be a HAIM prediction task
-            sources_predictors(List[str]): predictors to use for prediction, each source has one or more predictors
-            sources_modalities(List[str]): the modalities of the sources used for prediction
-            dataset(Optional[DataFrame]): HAIM dataframe
-            evaluation_name(Optional[str]): name of the experiment
+    Args:
+        prediction_task(task): task label, must be a HAIM prediction task
+        sources_predictors(List[str]): predictors to use for prediction, each source has one or more predictors
+        sources_modalities(List[str]): the modalities of the sources used for prediction
+        dataset(Optional[DataFrame]): HAIM dataframe
+        evaluation_name(Optional[str]): name of the experiment
     """
+
+    # Set up the folder path specific to the prediction task
+    task_folder = f"experiments/{prediction_task}"
+    if not os.path.exists(task_folder):
+        os.makedirs(task_folder)
     dataset = read_csv(constants.FILE_DF, nrows=constants.N_DATA) if dataset is None else dataset
 
     # Create the HAIMDataset
@@ -69,47 +71,29 @@ def run_single_experiment(prediction_task: str,
                           constants.IMG_ID,
                           constants.GLOBAL_ID)
 
-    # Sample the dataset using a 5-folds cross-validation method
-    sampler = Sampler(dataset, constants.GLOBAL_ID, 5)
-    _, masks = sampler()
-
-    # Initialization of the list containing the evaluation metrics
-    evaluation_metrics = [BinaryAccuracy(),
-                          BinaryBalancedAccuracy(),
-                          BinaryBalancedAccuracy(Reduction.GEO_MEAN),
-                          Sensitivity(),
-                          Specificity(),
-                          AUC(),
-                          BrierScore(),
-                          BinaryCrossEntropy()]
-
     # Define the grid of hyper-parameters for the tuning
     grid_hps = {'max_depth': [5, 6, 7, 8],
                 'n_estimators': [200, 300],
-                'learning_rate': [0.3, 0.1, 0.05],
-                }
+                'learning_rate': [0.3, 0.1, 0.05]}
 
-    # Save the fixed parameters of the model
-    fixed_params = {'seed': 42,
-                    'eval_metric': 'logloss',
-                    'verbosity': 1
-                    }
+    # Initialize the PyCaret Evaluator
+    evaluator = PyCaretEvaluator(dataset=dataset,
+                                 target=prediction_task,  
+                                 experiment_name=evaluation_name,
+                                 filepath=task_folder)
 
-    # Launch the evaluation
-    evaluation = Evaluator(dataset=dataset,
-                           masks=masks,
-                           metrics=evaluation_metrics,
-                           model=XGBClassifier,
-                           tuner=SklearnTuner,
-                           tuning_metric=AUC(),
-                           hps=grid_hps,
-                           n_tuning_splits=5,
-                           fixed_params=fixed_params,
-                           filepath=constants.EXPERIMENT_PATH,
-                           weight='scale_pos_weight',
-                           evaluation_name=evaluation_name
-                           )
-    evaluation.evaluate()
+    # Model training and results evaluation
+    evaluator.run_experiment(
+        train_size=0.8,
+        fold=5,
+        fold_strategy='stratifiedkfold',
+        outer_fold=5,
+        outer_strategy='stratifiedkfold',
+        session_id=42,
+        model='xgboost',
+        optimize='AUC',
+        custom_grid=grid_hps
+    )
 
 
 if __name__ == '__main__':
@@ -122,25 +106,34 @@ if __name__ == '__main__':
     # Load the dataframe from disk
     df = read_csv(constants.FILE_DF, nrows=constants.N_DATA)
 
-    all_tasks = Task() if args.task is None else [args.task]
+    # Handle all tasks if none specified
+    all_tasks = [args.task] if args.task else [constants.FRACTURE, constants.PNEUMOTHORAX, constants.PNEUMONIA, 
+                                           constants.LUNG_OPACITY, constants.LUNG_LESION, constants.ENLARGED_CARDIOMEDIASTINUM, 
+                                           constants.EDEMA, constants.CONSOLIDATION, constants.CARDIOMEGALY, 
+                                           constants.ATELECTASIS, constants.LOS, constants.MORTALITY]
+
 
     for task in all_tasks:
-        print("#"*23, f"{task} experiment", "#"*23)
+        print("#" * 23, f"{task} experiment", "#" * 23)
+
         # Get all possible combinations of sources for the current task
         sources_comb = get_all_sources_combinations(constants.SOURCES) if task in [constants.MORTALITY, constants.LOS] \
             else get_all_sources_combinations(constants.CHEST_SOURCES)
 
         with tqdm(total=len(sources_comb)) as bar:
             for count, combination in enumerate(sources_comb):
-
                 # Get all predictors and modalities for each source
                 predictors = []
                 for c in combination:
-                    predictors = predictors + c.sources
+                    predictors.extend(c.sources)  # Collect all predictors
                 modalities = unique([c.modality for c in combination])
 
-                run_single_experiment(prediction_task=task, sources_predictors=predictors, sources_modalities=modalities,
-                                      dataset=df, evaluation_name=task + '_' + str(count))
+                # Run the single experiment
+                run_single_experiment(prediction_task=task,
+                                      sources_predictors=predictors,
+                                      sources_modalities=modalities,
+                                      dataset=df,
+                                      evaluation_name=task + '_' + str(count))
                 bar.update()
 
-        Evaluator.get_best_of_experiments(task, constants.EXPERIMENT_PATH, count)
+        

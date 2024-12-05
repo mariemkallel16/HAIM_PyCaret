@@ -4,15 +4,39 @@ It uses the [HAIM multimodal dataset](https://physionet.org/content/haim-multimo
 (tabular, time-series, text and images) and 11 unique sources
 to perform 12 predictive tasks (10 chest pathologies, length-of-stay and 48 h mortality predictions).
 
-This package is our own adaptation of the [HAIM GitHub package](https://github.com/lrsoenksen/HAIM.git). 
+This [HAIM GitHub package](https://github.com/MEDomics-UdeS/HAIM) is MEDomicsLab’s own adaptation of the [HAIM GitHub package](https://github.com/lrsoenksen/HAIM.git).
+This version has the same purpose with differents tools, as we are incorporating our custom PyCaretEvaluator class for the training part.
 
-## 2. How to use the package ?
-The dataset used to replicate this study is publicly available in [physionet](https://physionet.org/content/haim-multimodal/1.0.1/). To run this package:
-- Download the dataset and move the file ``cxr_ic_fusion_1103.csv`` to [csvs](csvs).
-- Install the requirements under **Python 3.9.13** as following:
-```
-$ pip install -r requirements.txt
-```
+The PyCaretEvaluator class is designed to streamline and enhance the model evaluation process by integrating the PyCaret library with Ray for parallel execution, allowing for efficient memory management and performance optimization. PyCaret is an open-source, low-code machine learning library in Python that simplifies the process of building, training, and deploying machine learning models. This class is particularly useful for cases involving extensive model evaluations or hyperparameter tuning across multiple cross-validation folds. By leveraging Ray, the class executes each fold in parallel, reducing computation time and improving scalability on larger datasets.
+
+## 2. How to use the package?
+The dataset used to replicate this study is publicly available on [physionet](https://physionet.org/content/haim-multimodal/1.0.1/). 
+To run this package on **Python 3.11**, you need to set up a Conda environment to manage dependencies.
+
+### 2.1 Creating and Activating a Conda Environment
+
+1. **Create the environment** with the required Python version:
+
+   - 
+     ```bash
+     $ conda create --name haim_env python=3.11
+     ```
+
+2. **Activate the Conda environment**:
+
+   ```bash
+   $ conda activate haim_env
+
+   ```
+
+### 2.2 Installing the requirements
+
+  ```bash
+   $ pip install -r requirements.txt
+
+   ```
+
+
 The package can be used with different sources combinations to predict one of the 12 predictive tasks defined above. Here is a code snippet which uses one 
 combination of sources to predict patient's length-of-stay:
 ```python 
@@ -66,13 +90,6 @@ run the following command:
 ```
 $ python run_experiments.py
 ```
- 
-> **Warning**
-> 
-> The HAIM experiment performs 14324 evaluations (1023 evaluations for each of the chest pathologies prediction tasks and 2047 for the length-of-stay and 48h mortality). We didn't run the experiment but we approximate the execution time to 200 days run with the current implementation using only 10 CPUs.
-
-The experiments results (metrics values and figures) will be stored in the [``experiments``](experiments) directory where the name of each folder is structured as ``TaskName_NumberOfTheExperiment``
-(ex. Fracture_25). For each prediction task, the sources combination with the best AUC will be stored in the directory ``TaskName_best_experiment``.
 
 To reproduce the HAIM exepriment on one single predictive task, run the following command:
 ```
@@ -106,22 +123,23 @@ Below are the ``AUC`` values reported from our experiments compared to those rep
 
 
 
-Task | AUC from our experiment | AUC from the paper |
----------| -----------| ----------- |
-Fracture | 0.828 +- 0.110 | 0.838 |
-Pneumothorax| 0.811 +- 0.021 | 0.836 |
-Pneumonia       | 0.871 +- 0.013 | 0.883    |
-Lung opacity       | 	0.797 +- 0.015 | 0.816   |
-Lung lesion    | 0.829 +- 0.053	 | 0.844   |
-Enlarged Cardiomediastinum      | 0.877 +- 0.035	 | 0.876  |
-Edema      | 0.915 +- 0.007		 |0.917	 |
-Consolidation    | 0.918 +- 0.018		 | 0.929 |
-Cardiomegaly      | 0.908 +- 0.004	 | 0.914 |
-Atelectasis     | 0.765 +- 0.013	 | 0.779	 |
-Length of stay     | 0.932 +- 0.012		 | 0.939|
-48 hours mortality     | 0.907 +- 0.007		 | 0.912	|
+| Task                    | AUC from our 2nd experiment | AUC from our 1st experiment | AUC from the paper |
+|-------------------------|-----------------------------|-----------------------------|--------------------|
+| Fracture                | 0.731 +- 0.134                | 0.828 +- 0.110              | 0.838              |
+| Pneumothorax            | 0.898 +- 0.012              | 0.811 +- 0.021              | 0.836              |
+| Pneumonia               | 0.877 +- 0.012              | 0.871 +- 0.013              | 0.883              |
+| Lung opacity            | 0.809 +- 0.012              | 0.797 +- 0.015              | 0.816              |
+| Lung lesion             | 0.888 +- 0.069              | 0.829 +- 0.053              | 0.844              |
+| Enlarged Cardiomediastinum | 0.888 +- 0.019           | 0.877 +- 0.035              | 0.876              |
+| Edema                   | 0.915 +- 0.005              | 0.915 +- 0.007              | 0.917              |
+| Consolidation           | 0.912 +- 0.015              | 0.918 +- 0.018              | 0.929              |
+| Cardiomegaly            | 0.922 +- 0.005              | 0.908 +- 0.004              | 0.914              |
+| Atelectasis             | 0.796 +- 0.022              | 0.765 +- 0.013              | 0.779              |
+| Length of stay          | 0.959 +- 0.003              | 0.932 +- 0.012              | 0.939              |
+| 48 hours mortality      | 0.960 +- 0.004              | 0.907 +- 0.007              | 0.912              |
 
-More statistics and metrics are reported from each of the 12 experiments above and can be found in the ``experiments`` directory. Each experiment directory is named after the task on which the prediction model was evaluated.
+
+More statistics and metrics are reported from each of the 12 experiments above and can be found in the ``results`` directory. Each experiment directory is named after the task on which the prediction model was evaluated.
 
 > **Note**
 > 
@@ -132,19 +150,52 @@ More statistics and metrics are reported from each of the 12 experiments above a
 We tried to reproduce the HAIM experiment and used all the 1023 possible sources combinations to predict the presence or absence of a fracture in a patient and select the one resulting in the best ``AUC``.
 
 Below the ``AUC`` value reported from our experiments compared to the one reported in the HAIM paper. 
- AUC from our experiment | AUC from the paper |
- -----------| ----------- |
-0.862 +- 0.112 | 0.838 |
+ | AUC from our experiment with PyCaret | AUC from our experiment | AUC from the paper |
+|--------------------------------------|-------------------------|---------------------|
+| 0.731 ± 0.134                        | 0.862 ± 0.112          | 0.838              |
+
  
  
 The above experiment can be performed using the following command
 ```
 $ python run_experiments.py -t "Fracture"
 ```
-A recap of the experiment named [``Fracture_best_experiment``](experiments/Fracture_best_experiment) is generated at the end of the experiment containing more statistics and metrics values.
+A recap of the experiment (results/fracture) is generated at the end of the experiment containing :
+
+#### 1. ```{task}_results.json``` :
+
+This JSON file stores detailed results for each fold in the cross-validation process.
+For each fold, it includes:
+   - Train Results: Performance metrics obtained on the training data, captured after training and tuning the model.
+   - Test Predictions: Predictions generated by the model on the test data for this fold.
+   - Best Hyperparameters: The best hyperparameters found during tuning for this specific fold (if tuning was performed).
+This file serves as a comprehensive record of all results and configurations for each fold.
+
+#### 2. ```CP_{task}_final_metrics.csv``` :
+
+This CSV file consolidates the mean and standard deviation of key performance metrics calculated across all folds.
+Included columns:
+   - Metric: The name of each evaluation metric (e.g., AUC, F1 Score, Precision, Recall, MCC and Kappa).
+   - Mean: The average value of each metric across all folds.
+   - Std Dev: The standard deviation of each metric.
+This file gives an overall view of the model’s performance and consistency across folds.
+
+> **Note**
+> 
+> The Matthews Correlation Coefficient (MCC) is a metric that evaluates how well a model’s predictions match actual outcomes, balancing correct and incorrect predictions even when classes are imbalanced.
+ Cohen’s Kappa measures the level of agreement between two raters or classifiers, showing how often they agree beyond what would be expected by chance.
+
+
+#### 3. ```best_model_fold_X.pkl``` (where X is the fold number):
+
+For each fold, the best-performing model is saved as a .pkl file.
+Each model file can be reloaded independently if further analysis or testing is needed.
+Saving the best models for each fold allows you to compare models or even ensemble them if desired.
+
+All the results can be accessed via this link: https://usherbrooke-my.sharepoint.com/:f:/g/personal/kalm7073_usherbrooke_ca/EtKnOhTN1kdJmRbkziHYX9EBkgMSWzhfvXMV4lb_fZw3uQ?e=Olejde.
 
 ## 5. Future work
-The next step of our package is to regenerate the embeddings for each source type. For each modality (tabular, time-series, image, text), we will also explore new embeddings generators. 
+This adaptation aims to evaluate HAIM with PyCaret to better understand its effectiveness within the MEDomicsLab platform. Moving forward, we plan to test additional task variations to further optimize performance.
 
 ## Project Tree
 ```
@@ -155,10 +206,8 @@ The next step of our package is to regenerate the embeddings for each source typ
 │   ├── data
 │   │   ├── constants.py           <- Constants related to the HAIM study
 │   │   ├── datasets.py           <- Custom dataset implementation for the HAIM study
-│   │   └── sampling.py           <- Samples the dataset to test, train and validation
 │   ├── evaluation
-│   │   ├── tuning.py             <- Hyper-parameters optimizations using different optimizers
-│   │   └── evaluating.py         <- Skeleton of each experiment process 
+│   │   └── pycaret_evaluator.py         <- Skeleton of each experiment process 
 │   └── utils                     
 │   │   └── metric_scores.py      <- Custom metrics implementations and wrappers
 ├── requirements.txt              <- All the requirements to install to run the project
