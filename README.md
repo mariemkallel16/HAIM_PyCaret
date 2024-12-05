@@ -4,25 +4,20 @@ It uses the [HAIM multimodal dataset](https://physionet.org/content/haim-multimo
 (tabular, time-series, text and images) and 11 unique sources
 to perform 12 predictive tasks (10 chest pathologies, length-of-stay and 48 h mortality predictions).
 
-The first package is MEDomicsLab’s own adaptation of the [HAIM GitHub package](https://github.com/lrsoenksen/HAIM.git).
-This package is an adaptation of the [HAIM GitHub package](https://github.com/MEDomics-UdeS/HAIM), incorporating our custom PyCaretEvaluator class.
+This [HAIM GitHub package](https://github.com/MEDomics-UdeS/HAIM) is MEDomicsLab’s own adaptation of the [HAIM GitHub package](https://github.com/lrsoenksen/HAIM.git).
+This version has the same purpose with differents tools, as we are incorporating our custom PyCaretEvaluator class for the training part.
 
 The PyCaretEvaluator class is designed to streamline and enhance the model evaluation process by integrating the PyCaret library with Ray for parallel execution, allowing for efficient memory management and performance optimization. PyCaret is an open-source, low-code machine learning library in Python that simplifies the process of building, training, and deploying machine learning models. This class is particularly useful for cases involving extensive model evaluations or hyperparameter tuning across multiple cross-validation folds. By leveraging Ray, the class executes each fold in parallel, reducing computation time and improving scalability on larger datasets.
 
 ## 2. How to use the package?
 The dataset used to replicate this study is publicly available on [physionet](https://physionet.org/content/haim-multimodal/1.0.1/). 
-To run this package on **Python 3.10 or 3.11**, you need to set up a Conda environment to manage dependencies.
+To run this package on **Python 3.11**, you need to set up a Conda environment to manage dependencies.
 
 ### 2.1 Creating and Activating a Conda Environment
 
 1. **Create the environment** with the required Python version:
 
-   - For **Python 3.10**:
-     ```bash
-     $ conda create --name haim_env python=3.10
-     ```
-
-   - For **Python 3.11**:
+   - 
      ```bash
      $ conda create --name haim_env python=3.11
      ```
