@@ -26,10 +26,6 @@ necessary step for integrating the dataset into the
 | Enlarged Cardiomediastinum | ~0.82 | 0.8183 |
 | Consolidation | ~0.87 | 0.8725 |
 
-### Reference
-Mariem Kallel. *Contributions au développement de la plateforme MEDomics*. 
-Mémoire de maîtrise, Université de Sherbrooke, 2026.
-
 ---
 
 
