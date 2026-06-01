@@ -1,10 +1,23 @@
-test*.py
+# Jupyter
 *checkpoint*
+.ipynb_checkpoints/
+
+# Python
+*py_cache*
+*.pyc
+__pycache__/
+
+# Data & results
+*.csv
+experiments/
+
+# Tests & misc
+test*.py
 *.xml
 Fracture_*
-*py_cache*
+
+# Hidden files (keep specific ones)
 .*
 !.gitignore
 !.gitkeep
 !*best_experiment*
-*.csv

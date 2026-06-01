@@ -1,3 +1,38 @@
+## MEDomics PoC — Additional Experiments
+
+> This branch (`medomics-poc`) extends the original repository with 
+> experiments developed as part of my Master's thesis at Université de 
+> Sherbrooke ([MEDomicsLab](https://github.com/MEDomicsLab)).
+
+### Added files
+
+| File | Description |
+|---|---|
+| `src/data/dataset_adapted_poc.py` | Adapted `HAIMDataset` with flexible modality selection and `float32` compression for MEDomics integration |
+| `notebooks_poc/enlarged_cardiomediastinum.ipynb` | Compression validation experiment — Enlarged Cardiomediastinum task |
+| `notebooks_poc/consolidation.ipynb` | Compression validation experiment — Consolidation task |
+
+### Purpose
+
+These notebooks validate that compressing HAIM features from `float64` 
+to `float32` (scaled by 100,000) preserves model performance, a 
+necessary step for integrating the dataset into the 
+[MEDomics](https://github.com/MEDomicsLab/MEDomicsLab) platform.
+
+### Results
+
+| Task | HAIM original | Code (compressed) |
+|---|---|---|
+| Enlarged Cardiomediastinum | ~0.82 | 0.8183 |
+| Consolidation | ~0.87 | 0.8725 |
+
+### Reference
+Mariem Kallel. *Contributions au développement de la plateforme MEDomics*. 
+Mémoire de maîtrise, Université de Sherbrooke, 2026.
+
+---
+
+
 ## 1. Introduction
 This is an open-source python package which attempts to replicate the [HAIM](https://www.nature.com/articles/s41746-022-00689-4) study. 
 It uses the [HAIM multimodal dataset](https://physionet.org/content/haim-multimodal/1.0.1/) containing data of 4 modalities 
